@@ -1,10 +1,10 @@
 class TrackTaskZoneSpec {
-  constructor(next) {
+  constructor (next) {
     this.name = 'TaskTrackingZone'
     this.next = next
   }
 
-  onHasTask(delegate, current, target, hasTaskState) {
+  onHasTask (delegate, current, target, hasTaskState) {
     if (
       !hasTaskState.microTask
       && !hasTaskState.macroTask
@@ -13,7 +13,7 @@ class TrackTaskZoneSpec {
     }
   }
 
-  onInvokeTask(
+  onInvoke (
     parentZoneDelegate,
     currentZone,
     targetZone,
@@ -23,16 +23,20 @@ class TrackTaskZoneSpec {
   ) {
     console.log(
       'Zone:', currentZone.name,
-      'Task:', task
+      'enter'
     )
-    console.log('Invoke', task.source)
 
-    return parentZoneDelegate.invoke(
+    parentZoneDelegate.invoke(
       targetZone,
       task,
       applyThis,
       applyArgs,
       source
+    )
+
+    console.log(
+      'Zone:', currentZone.name,
+      'leave'
     )
   }
 }
@@ -47,7 +51,7 @@ const asyncQueue = [function () {
 
   setTimeout(function () {
     console.log('async fn2 timeout called')
-  }, 300)
+  }, 100)
 
   console.log('async fn2 end')
 }]
@@ -124,6 +128,11 @@ define(['jquery', 'zone.js', 'async.js', 'lodash.js'], ($, zone, async, _) => {
 
   function execFnAndCheck(fns) {
     let taskQueue = []
+
+    logZone.fork(new TrackTaskZoneSpec(()=> console.log('end'))).run(fns[0])
+    // logZone.run(fns[0])
+
+    return
 
     fns.forEach(fn => {
       let taskExec = (next) => {
