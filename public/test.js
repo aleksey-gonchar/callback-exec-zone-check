@@ -47,13 +47,13 @@ const queue = [function () {
 }]
 
 const asyncQueue = [function () {
-  console.log('async fn2 start')
+  console.log('async fn1 start')
 
   setTimeout(function () {
-    console.log('async fn2 timeout called')
+    console.log('async fn1 timeout called')
   }, 100)
 
-  console.log('async fn2 end')
+  console.log('async fn1 end')
 }]
 
 const mixedQueue = [
@@ -67,7 +67,7 @@ const mixedQueue = [
 
     setTimeout(function () {
       console.log('async fn2 timeout called')
-    }, 300)
+    }, 1500)
 
     console.log('async fn2 end')
   },
@@ -77,7 +77,7 @@ const mixedQueue = [
 
     setTimeout(function () {
       console.log('async fn3 timeout called')
-    }, 300)
+    }, 400)
 
     console.log('async fn3 end')
   },
@@ -129,10 +129,8 @@ define(['jquery', 'zone.js', 'async.js', 'lodash.js'], ($, zone, async, _) => {
   function execFnAndCheck(fns) {
     let taskQueue = []
 
-    logZone.fork(new TrackTaskZoneSpec(()=> console.log('end'))).run(fns[0])
-    // logZone.run(fns[0])
-
-    return
+    // logZone.fork(new TrackTaskZoneSpec(()=> console.log('end'))).run(fns[0])
+    // return
 
     fns.forEach(fn => {
       let taskExec = (next) => {
@@ -140,7 +138,8 @@ define(['jquery', 'zone.js', 'async.js', 'lodash.js'], ($, zone, async, _) => {
           next()
         }
 
-        let fnZone = logZone.fork(new TrackTaskZoneSpec(innerNext))
+        // let fnZone = logZone.fork(new TrackTaskZoneSpec(innerNext))
+        let fnZone = rootZone.fork(new TrackTaskZoneSpec(innerNext))
         fnZone.run(fn)
 
         const taskCounts = fnZone._zoneDelegate._taskCounts
@@ -153,8 +152,8 @@ define(['jquery', 'zone.js', 'async.js', 'lodash.js'], ($, zone, async, _) => {
       taskQueue.push(taskExec)
     })
 
-    async.series(taskQueue, (err, results) => {
-      console.log('cb call queue finished')
+    async.parallel(taskQueue, (err, results) => {
+      console.log('CB CALL QUEUE FINISHED')
     })
   }
 
