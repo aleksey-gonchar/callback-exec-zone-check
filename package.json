@@ -1,0 +1,23 @@
+{
+  "name": "zone-cb",
+  "version": "1.0.0",
+  "description": "This project is used to publish test integrations to http://integrations.solink.us",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "lite-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SolidOpinion/integrations.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SolidOpinion/integrations/issues"
+  },
+  "homepage": "https://github.com/SolidOpinion/integrations#readme",
+  "devDependencies": {
+    "lite-server": "^2.2.2"
+  }
+}

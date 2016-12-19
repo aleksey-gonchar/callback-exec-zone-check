@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script data-main="main" src="require.js"></script>
+</head>
+
+<body>
+<h1>Callback call exec check state example</h1>
+
+<button onclick="execFnAndCheck(queue)">For simple cb w/o async inner logic</button>
+<button onclick="execFnAndCheck(asyncQueue)">For async cb </button>
+<button onclick="execFnAndCheck(mixedQueue)">For mixed cb </button>
+<div><strong>Output:</strong></div>
+<div id='console'></div>
+</body>
+</html>
