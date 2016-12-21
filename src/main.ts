@@ -1,3 +1,12 @@
+'use strict'
+
+import 'jquery'
+import 'zone.js'
+
+
+const async = require('async')
+const _ = require('lodash')
+
 class TrackTaskZoneSpec {
   constructor (next) {
     this.name = 'TaskTrackingZone'
@@ -92,75 +101,71 @@ function htmlLog(payload) {
   document.getElementById('console').innerHTML += (`${payload}<br>`)
 }
 
-define(['jquery', 'zone.js', 'async.js', 'lodash.js'], ($, zone, async, _) => {
-  let rootZone = Zone.current
-  let cbZones = []
+let rootZone = Zone.current
+let cbZones = []
 
-  let logZone = rootZone.fork({
-    name: 'logZone',
-    onInvoke: function (
-      parentZoneDelegate,
-      currentZone,
+let logZone = rootZone.fork({
+  name: 'logZone',
+  onInvoke: function (
+    parentZoneDelegate,
+    currentZone,
+    targetZone,
+    task, delegate,
+    applyThis, applyArgs,
+    source
+  ) {
+    console.log(
+      'Zone:', currentZone.name,
+      'enter'
+    )
+
+    parentZoneDelegate.invoke(
       targetZone,
-      task, delegate,
-      applyThis, applyArgs,
+      task,
+      applyThis,
+      applyArgs,
       source
-    ) {
-      console.log(
-        'Zone:', currentZone.name,
-        'enter'
-      )
+    )
 
-      parentZoneDelegate.invoke(
-        targetZone,
-        task,
-        applyThis,
-        applyArgs,
-        source
-      )
-
-      console.log(
-        'Zone:', currentZone.name,
-        'leave'
-      )
-    }
-  })
-
-  function execFnAndCheck(fns) {
-    let taskQueue = []
-
-    // logZone.fork(new TrackTaskZoneSpec(()=> console.log('end'))).run(fns[0])
-    // return
-
-    fns.forEach(fn => {
-      let taskExec = (next) => {
-        let innerNext = () => {
-          next()
-        }
-
-        // let fnZone = logZone.fork(new TrackTaskZoneSpec(innerNext))
-        let fnZone = rootZone.fork(new TrackTaskZoneSpec(innerNext))
-        fnZone.run(fn)
-
-        const taskCounts = fnZone._zoneDelegate._taskCounts
-
-        if (!_.some(taskCounts, value => value > 0)) {
-          return next()
-        }
-      }
-
-      taskQueue.push(taskExec)
-    })
-
-    async.parallel(taskQueue, (err, results) => {
-      console.log('CB CALL QUEUE FINISHED')
-    })
+    console.log(
+      'Zone:', currentZone.name,
+      'leave'
+    )
   }
-
-  window.cbZones = cbZones
-  window.execFnAndCheck = execFnAndCheck
-
-  console.log('test.js loaded')
 })
 
+function execFnAndCheck(fns) {
+  let taskQueue = []
 
+  // logZone.fork(new TrackTaskZoneSpec(()=> console.log('end'))).run(fns[0])
+  // return
+
+  fns.forEach(fn => {
+    let taskExec = (next) => {
+      let innerNext = () => {
+        next()
+      }
+
+      // let fnZone = logZone.fork(new TrackTaskZoneSpec(innerNext))
+      let fnZone = rootZone.fork(new TrackTaskZoneSpec(innerNext))
+      fnZone.run(fn)
+
+      const taskCounts = fnZone._zoneDelegate._taskCounts
+
+      if (!_.some(taskCounts, value => value > 0)) {
+        return next()
+      }
+    }
+
+    taskQueue.push(taskExec)
+  })
+
+  async.parallel(taskQueue, (err, results) => {
+    console.log('CB CALL QUEUE FINISHED')
+  })
+}
+
+window.cbZones = cbZones
+window.execFnAndCheck = execFnAndCheck
+
+console.log('test.js loaded')
