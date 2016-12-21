@@ -19,7 +19,7 @@ module.exports = {
   metadata: METADATA,
   data: _.extend(commonConfig.data, {
     entry: {
-      'main1': './src/main.ts'
+      'main': './src/main.ts'
     },
     plugins: [
       new ForkCheckerPlugin(),
