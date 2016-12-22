@@ -5,7 +5,6 @@ import 'zone.js'
 
 const async = require('async')
 const _ = require('lodash')
-// const Promise = require('bluebird')
 
 class TrackTaskZoneSpec {
   constructor (next) {
@@ -25,23 +24,11 @@ class TrackTaskZoneSpec {
     this.taskInvoked++
 
     if (this.taskCount === this.taskInvoked) {
-      // console.log('schedule next() call')
       __zone_symbol__setTimeout(() => {
-        // console.log('calling next()')
         this.next()
       }, 0)
     }
   }
-
-  // onHasTask (delegate, current, target, hasTaskState) {
-  //   console.log(hasTaskState.change)
-  //   if (
-  //     !hasTaskState.microTask
-  //     && !hasTaskState.macroTask
-  //   ) {
-  //     this.next()
-  //   }
-  // }
 
   onInvoke (
     parentZoneDelegate,
@@ -71,9 +58,6 @@ class TrackTaskZoneSpec {
   }
 }
 
-
-// TODO: add dom manipulation fn
-
 function getUrl (url, resolve, reject) {
   const xhr = new XMLHttpRequest
   xhr.addEventListener('error', reject)
@@ -82,6 +66,7 @@ function getUrl (url, resolve, reject) {
   xhr.send(null)
 }
 
+// TODO: add dom manipulation fn
 const promiseXhrQueue = [
   function () {
     console.log('getUrl: enter')
@@ -204,11 +189,6 @@ function execFnAndCheck(fns) {
 
   fns.forEach(fn => {
     let taskExec = (next) => {
-      let taskCount = 0
-      let taskCompleted = 0
-      let callCount = 0
-      let taskCounts = null
-
       let innerNext = () => {
         console.log('REAL next() call')
         next()
@@ -220,8 +200,8 @@ function execFnAndCheck(fns) {
       fnZones.push(fnZone)
       fnZone.run(fn)
 
-      taskCounts = fnZone._zoneDelegate._taskCounts
-      taskCount = _.reduce(taskCounts, (res, count) => {
+      const taskCounts = fnZone._zoneDelegate._taskCounts
+      const taskCount = _.reduce(taskCounts, (res, count) => {
         if (count === 0) { return res }
         res += count
 
