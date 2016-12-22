@@ -241,10 +241,6 @@ function execFnAndCheck(fns) {
 
 window.fnZones = fnZones
 window.execFnAndCheck = {
-  sync: () => execFnAndCheck(queue),
-  async: () => execFnAndCheck(async),
-  // mixed: () => execFnAndCheck(mixedQueue)
-  // mixed: () => execFnAndCheck(promiseQueue)
   mixed: () => execFnAndCheck(promiseXhrQueue)
 }
 console.log('main.js loaded')
