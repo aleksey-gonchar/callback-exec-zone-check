@@ -23,14 +23,6 @@ module.exports = {
     },
     plugins: [
       new ForkCheckerPlugin(),
-      new webpack.DllReferencePlugin({
-        context: '.',
-        manifest: require('widget-common/dist/so_polyfills-manifest.json')
-      }),
-      new webpack.DllReferencePlugin({
-        context: '.',
-        manifest: require('widget-common/dist/so_vendor-manifest.json')
-      }),
       new ContextReplacementPlugin(
         // The (\\|\/) piece accounts for path separators in *nix and Windows
         /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,

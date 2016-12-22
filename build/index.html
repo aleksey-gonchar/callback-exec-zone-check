@@ -2,19 +2,14 @@
 <html>
 
 <head>
-  <script type="text/javascript" src="//embed-loc.solidopinion.com/so_polyfills.js"></script>
-  <script type="text/javascript" src="//embed-loc.solidopinion.com/so_vendor.js"></script>
-
   <script src="main.js"></script>
 </head>
 
 <body>
 <h1>Callback call exec check state example</h1>
 
-<button onclick="execFnAndCheck(queue)">For simple cb w/o async inner logic</button>
-<button onclick="execFnAndCheck(asyncQueue)">For async cb </button>
-<button onclick="execFnAndCheck(mixedQueue)">For mixed cb </button>
-<div><strong>Output:</strong></div>
-<div id='console'></div>
+<button onclick="execFnAndCheck.sync()">For simple cb w/o async inner logic</button>
+<button onclick="execFnAndCheck.async()">For async cb </button>
+<button onclick="execFnAndCheck.mixed()">For mixed cb </button>
 </body>
 </html>
