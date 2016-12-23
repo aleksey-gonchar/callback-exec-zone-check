@@ -5,11 +5,10 @@ import 'zone.js'
 
 const async = require('async')
 const _ = require('lodash')
-const request = require('superagent')
 
 class AfterAllZone {
   constructor (next) {
-    this.name = 'TaskTrackingZone'
+    this.name = 'AfterAllZone'
     this.next = next
     this.taskCount = 0
     this.taskInvoked = 0
@@ -31,26 +30,13 @@ class AfterAllZone {
     }
   }
 
-  onInvoke (
-    parentZoneDelegate,
-    currentZone,
-    targetZone,
-    task, delegate,
-    applyThis, applyArgs,
-    source
-  ) {
+  onInvoke (parentZoneDelegate, currentZone, targetZone, task, delegate, applyThis, applyArgs, source ) {
     console.log(
       'Zone:', currentZone.name,
       'enter'
     )
 
-    parentZoneDelegate.invoke(
-      targetZone,
-      task,
-      applyThis,
-      applyArgs,
-      source
-    )
+    parentZoneDelegate.invoke(targetZone, task, applyThis, applyArgs, source)
 
     console.log(
       'Zone:', currentZone.name,
@@ -67,21 +53,8 @@ function getUrl (url, resolve, reject) {
   xhr.send(null)
 }
 
-function htmlLog(payload) {
-  document.getElementById('console').innerHTML += (`${payload}<br>`)
-}
-
 // TODO: add dom manipulation fn
 const promiseXhrQueue = [
-  function () {
-    request.get('http://localhost:8080/')
-      .end((err, res) => {
-        console.log('request.get():end()', res)
-      })
-  },
-  function () {
-    htmlLog('test')
-  },
   function () {
     console.log('getUrl: enter')
     getUrl('http://localhost:8080/', () => {
@@ -194,55 +167,22 @@ const promiseXhrQueue = [
   }
 ]
 
-
-let rootZone = Zone.current
-let fnZones = []
-
 function execFnAndCheck(fns) {
   let taskQueue = []
 
-  fns.forEach(fn => {
-    let taskExec = (next) => {
-      let innerNext = () => {
-        console.log('REAL next() call')
-        next()
-      }
+  return new Promise( (resolve, reject) => {
+    const throttledResolve = _.throttle(resolve, 100, { leading: false, trailing: true })
 
-      const throttledNext = _.throttle(innerNext, 100, { leading: false, trailing: true })
-      let fnZone = rootZone.fork(new AfterAllZone(throttledNext))
-      fnZones.push(fnZone)
-      fnZone.run(fn)
-
-      const taskCounts = fnZone._zoneDelegate._taskCounts
-      const taskCount = _.reduce(taskCounts, (res, count) => {
-        if (count === 0) { return res }
-        res += count
-
-        return res
-      }, 0)
-
-      if (taskCount === 0) { return next() }
-    }
-
-    taskQueue.push(taskExec)
-  })
-
-  return new Promise((resolve, reject) => {
-    async.parallel(taskQueue, (err, results) => {
-      if (err) { return reject() }
-
-      return resolve()
+    Zone.current.fork(new AfterAllZone(throttledResolve)).run(() => {
+      _.map(fns, fn => fn())
     })
   })
+    .then(() => {
+      console.log('CB CALL QUEUE FINISHED')
+    })
 }
 
-window.fnZones = fnZones
 window.execFnAndCheck = {
-  mixed: () => {
-    execFnAndCheck(promiseXhrQueue)
-      .then(() => {
-        console.log('CB CALL QUEUE FINISHED')
-      })
-  }
+  mixed: () => execFnAndCheck(promiseXhrQueue)
 }
 console.log('main.js loaded')
